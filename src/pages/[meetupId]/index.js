@@ -1,4 +1,5 @@
-import MeetupList from "@/components/meetups/MeetupList";
+import MeetupDetails from "@/components/meetups/MeetupDetails";
+import { useRouter } from "next/router";
 
 const DUMMY_MEETUP = [
   {
@@ -27,20 +28,49 @@ const DUMMY_MEETUP = [
   },
 ];
 
-export default function Home(props) {
-  return (
-    <>
-      <div>
-        <MeetupList meetups={props.meetups} />
-      </div>
-    </>
+const page = (props) => {
+  const router = useRouter();
+
+  const findMeetup = props.meetups.find(
+    (meetup) => meetup.id == router.query.meetupId
   );
+
+  return (
+    <div>
+      <MeetupDetails meetup={findMeetup} />
+    </div>
+  );
+};
+
+export async function getStaticPaths() {
+  return {
+    fallback: false,
+    paths: [
+      {
+        params: {
+          meetupId: "m1",
+        },
+      },
+      {
+        params: {
+          meetupId: "m2",
+        },
+      },
+      {
+        params: {
+          meetupId: "m3",
+        },
+      },
+    ],
+  };
 }
 
-export function getStaticProps() {
+export async function getStaticProps() {
   return {
     props: {
       meetups: DUMMY_MEETUP,
     },
   };
 }
+
+export default page;
