@@ -1,46 +1,51 @@
 import MeetupList from "@/components/meetups/MeetupList";
-
-const DUMMY_MEETUP = [
-  {
-    id: "m1",
-    title: "First Meetup",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRry0ry_CmK1oRDQhvU1siSpeAXmE_gQ_qE6-H529oMiw&s",
-    address: "Some Address 1",
-    description: "a dummy meetup ",
-  },
-  {
-    id: "m2",
-    title: "Second Meetup",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ__gWPNIJI6if9d0bJUNpowkajy93ZMmD91osVjl6xd1zXOKb4j9aJpRW8lEHJcDqCUlA&usqp=CAU",
-    address: "Some Address 2",
-    description: "a dummy meetup ",
-  },
-  {
-    id: "m3",
-    title: "Third Meetup",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7Ciyh_YInleOdQPaGX_nU0xLazBplHl3h5GUwCBH--g&s",
-    address: "Some Address 3",
-    description: "a dummy meetup ",
-  },
-];
+import { MongoClient } from "mongodb";
 
 export default function Home(props) {
+  const fetchMeetups = async () => {
+    const response = await fetch("/api/new-meetup");
+
+    const data = await response.json();
+
+    console.log(data);
+  };
+
   return (
     <>
       <div>
         <MeetupList meetups={props.meetups} />
+        <button onClick={fetchMeetups}>Fetch</button>
       </div>
     </>
   );
 }
 
-export function getStaticProps() {
+export async function getStaticProps() {
+  const client = await MongoClient.connect(
+    "mongodb+srv://divygupta208:Od3ZfMtHifvrEy4g@cluster0.wq9srs7.mongodb.net/meetups?retryWrites=true&w=majority&appName=Cluster0"
+  );
+
+  const db = client.db();
+
+  const meetupsCollection = db.collection("meetups");
+
+  const meetups = await meetupsCollection.find().toArray();
+
+  client.close();
+
+  // const res = await fetch("/api/new-meetup");
+
+  // const meetups = await res.json();
+
   return {
     props: {
-      meetups: DUMMY_MEETUP,
+      meetups: meetups.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString(),
+      })),
     },
+    revalidate: 1,
   };
 }
