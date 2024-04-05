@@ -1,5 +1,6 @@
 import MeetupList from "@/components/meetups/MeetupList";
 import { MongoClient } from "mongodb";
+import Head from "next/head";
 
 export default function Home(props) {
   const fetchMeetups = async () => {
@@ -12,10 +13,11 @@ export default function Home(props) {
 
   return (
     <>
-      <div>
-        <MeetupList meetups={props.meetups} />
-        <button onClick={fetchMeetups}>Fetch</button>
-      </div>
+      <Head>
+        <title>Meetup App</title>
+      </Head>
+      <MeetupList meetups={props.meetups} />
+      <button onClick={fetchMeetups}>Fetch</button>
     </>
   );
 }
@@ -37,6 +39,7 @@ export async function getStaticProps() {
 
   // const meetups = await res.json();
 
+  console.log(meetups);
   return {
     props: {
       meetups: meetups.map((meetup) => ({
@@ -49,3 +52,11 @@ export async function getStaticProps() {
     revalidate: 1,
   };
 }
+
+// export async function getServerSideProps() {
+//   const res = await fetch("/api/new-meetup");
+
+//   const meetups = await res.json();
+
+//   console.log(meetups);
+// }
